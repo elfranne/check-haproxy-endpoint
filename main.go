@@ -1,14 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
-	"unsafe"
 
+	"github.com/ruansteve/go-haproxy"
 	corev2 "github.com/sensu/core/v2"
 	"github.com/sensu/sensu-plugin-sdk/sensu"
 )
@@ -16,9 +13,7 @@ import (
 // Config represents the check plugin config.
 type Config struct {
 	sensu.PluginConfig
-	URL       string
-	AdminUser string
-	AdminPass string
+	Socket string
 }
 
 var (
@@ -32,31 +27,13 @@ var (
 
 	options = []sensu.ConfigOption{
 		&sensu.PluginConfigOption[string]{
-			Path:      "url",
-			Env:       "HAPROXY_URL",
-			Argument:  "url",
-			Shorthand: "u",
-			Default:   "http://demo.haproxy.org/;json",
-			Usage:     "URLs to query for HAProxy stats",
-			Value:     &plugin.URL,
-		},
-		&sensu.PluginConfigOption[string]{
-			Path:      "admin-user",
-			Env:       "HAPROXY_ADMIN_USER",
-			Argument:  "admin-user",
-			Shorthand: "a",
-			Default:   "",
-			Usage:     "admin username to be supplied for basic auth, optional",
-			Value:     &plugin.AdminUser,
-		},
-		&sensu.PluginConfigOption[string]{
-			Path:      "admin-pass",
-			Env:       "HAPROXY_ADMIN_PASS",
-			Argument:  "admin-pass",
-			Shorthand: "p",
-			Default:   "",
-			Usage:     "admin password to be supplied for basic auth, optional",
-			Value:     &plugin.AdminPass,
+			Path:      "socket",
+			Env:       "HAPROXY_SOCKET",
+			Argument:  "socket",
+			Shorthand: "s",
+			Default:   "unix:///var/run/haproxy.sock",
+			Usage:     "Socket to query for HAProxy stats",
+			Value:     &plugin.Socket,
 		},
 	}
 )
@@ -84,43 +61,34 @@ func checkArgs(event *corev2.Event) (int, error) {
 }
 
 func executeCheck(event *corev2.Event) (int, error) {
+	client := &haproxy.HAProxyClient{
+		Addr: plugin.Socket,
+	}
 
-	jsonData := make(map[string]interface{})
-
-	req, err := http.NewRequest("GET", plugin.URL, nil)
+	stats, err := client.Stats()
 	if err != nil {
-		return sensu.CheckStateWarning, fmt.Errorf("failed build request")
+		fmt.Printf("could not connect to socket: %s", err)
+		return sensu.CheckStateCritical, nil
+	}
+	Critcount := 0
+	Warncount := 0
+	for _, i := range stats {
+		if i.SvName == "BACKEND" && i.Status == "DOWN" {
+			fmt.Printf("Service %s is %s!\n", i.PxName, i.Status)
+			Critcount += 1
+		}
+		if i.SvName != "BACKEND" && i.Status == "DOWN" {
+			fmt.Printf("Backend %s for service %s is %s!\n", i.SvName, i.PxName, i.Status)
+			Warncount += 1
+		}
 	}
 
-	if len(plugin.AdminPass) > 0 && len(plugin.AdminUser) > 0 {
-		req.SetBasicAuth(plugin.AdminUser, plugin.AdminPass)
+	if Critcount > 0 {
+		return sensu.CheckStateCritical, nil
 	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "github.com/elfranne/check-haproxy-endpoint")
-	req.Close = true
-	client := http.Client{}
-	response, err := client.Do(req)
-	if err != nil {
-		return sensu.CheckStateWarning, fmt.Errorf("request failed")
+	if Warncount > 0 {
+		return sensu.CheckStateCritical, nil
 	}
-	if response.StatusCode != http.StatusOK {
-		return sensu.CheckStateWarning, fmt.Errorf("bad http return code")
-	}
-	defer response.Body.Close()
-	bodyData, _ := io.ReadAll(response.Body)
-
-	json.NewDecoder(response.Body).Decode(&jsonData)
-
-	// debug
-	fmt.Printf("http resp: %d\n", response.StatusCode)
-	fmt.Printf("body size: %d\n", unsafe.Sizeof(bodyData))
-	fmt.Printf("Decoded: %s\n", plugin.URL)
-	fmt.Printf("decoded size: %d\n", unsafe.Sizeof(jsonData))
-	fmt.Printf("data: %s\n", jsonData)
-
-	for key, metric := range jsonData {
-		fmt.Printf("data2: %s, %s\n", metric, key)
-	}
+	fmt.Printf("Haproxy at %s: all systems UP\n", plugin.Socket)
 	return sensu.CheckStateOK, nil
 }

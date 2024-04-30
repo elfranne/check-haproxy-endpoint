@@ -198,8 +198,15 @@ func executeCheck(event *corev2.Event) (int, error) {
 		return sensu.CheckStateCritical, nil
 	}
 
-	if len(plugin.CheckMissing) == 0 && !plugin.List {
+	if len(plugin.CheckMissing) == 0 && !plugin.List && !plugin.Backends && !plugin.Servers {
 		fmt.Printf("Haproxy at %s: all systems UP\n", plugin.Socket)
+	}
+
+	if len(plugin.CheckMissing) == 0 && !plugin.List && plugin.Backends && len(plugin.Backend) > 0 {
+		fmt.Printf("Service %s is UP\n", plugin.Backend)
+	}
+	if len(plugin.CheckMissing) == 0 && !plugin.List && plugin.Servers && len(plugin.Server) > 0 {
+		fmt.Printf("Server %s is UP: \n", plugin.Server)
 	}
 
 	return sensu.CheckStateOK, nil

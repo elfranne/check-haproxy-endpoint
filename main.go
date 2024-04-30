@@ -169,13 +169,13 @@ func executeCheck(event *corev2.Event) (int, error) {
 			fmt.Printf("%s\n", i.SvName)
 		}
 
-		if !plugin.List && !plugin.Servers && i.SvName == "BACKEND" && i.Status == "DOWN" {
+		if len(plugin.CheckMissing) == 0 && !plugin.List && !plugin.Servers && i.SvName == "BACKEND" && i.Status == "DOWN" {
 			if len(plugin.Backend) == 0 || (len(plugin.Backend) > 0 && plugin.Backend == i.PxName) {
 				fmt.Printf("Service %s is %s!\n", i.PxName, i.Status)
 				Critcount += 1
 			}
 		}
-		if !plugin.List && !plugin.Backends && i.SvName != "BACKEND" && i.Status == "DOWN" {
+		if len(plugin.CheckMissing) == 0 && !plugin.List && !plugin.Backends && i.SvName != "BACKEND" && i.Status == "DOWN" {
 			if len(plugin.Server) == 0 || (len(plugin.Server) > 0 && plugin.Server == i.SvName) {
 				fmt.Printf("Backend %s for service %s is %s!\n", i.SvName, i.PxName, i.Status)
 				Warncount += 1

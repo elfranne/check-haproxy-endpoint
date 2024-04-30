@@ -197,6 +197,10 @@ func executeCheck(event *corev2.Event) (int, error) {
 	if Warncount > 0 {
 		return sensu.CheckStateCritical, nil
 	}
-	fmt.Printf("Haproxy at %s: all systems UP\n", plugin.Socket)
+
+	if len(plugin.CheckMissing) == 0 && !plugin.List {
+		fmt.Printf("Haproxy at %s: all systems UP\n", plugin.Socket)
+	}
+
 	return sensu.CheckStateOK, nil
 }

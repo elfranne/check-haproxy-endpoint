@@ -3,7 +3,7 @@ module github.com/elfranne/check-haproxy-endpoint
 go 1.22
 
 require (
-	github.com/google/go-cmp v0.5.9
+	github.com/google/go-cmp v0.6.0
 	github.com/ruansteve/go-haproxy v1.0.3
 	github.com/sensu/core/v2 v2.20.0
 	github.com/sensu/sensu-plugin-sdk v0.19.0

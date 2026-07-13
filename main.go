@@ -195,7 +195,7 @@ func executeCheck(event *corev2.Event) (int, error) {
 		return sensu.CheckStateCritical, nil
 	}
 	if Warncount > 0 {
-		return sensu.CheckStateCritical, nil
+		return sensu.CheckStateWarning, nil
 	}
 
 	if len(plugin.CheckMissing) == 0 && !plugin.List && !plugin.Backends && !plugin.Servers {

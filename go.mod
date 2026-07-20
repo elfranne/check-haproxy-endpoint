@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	github.com/google/go-cmp v0.7.0
 	github.com/ruansteve/go-haproxy v1.0.3
-	github.com/sensu/core/v2 v2.21.3
+	github.com/sensu/core/v2 v2.21.4
 	github.com/sensu/sensu-plugin-sdk v0.19.0
 )
 

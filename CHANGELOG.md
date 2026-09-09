@@ -7,6 +7,8 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [0.4.0] - 2026-09-09
+
 ### Changed
 - Migrated `.goreleaser.yml` to the GoReleaser v2 config schema.
 - Hardened the GitHub Actions workflows: tightened permissions to least-privilege,
@@ -15,7 +17,9 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 - Rewrote `README.md` and `CHANGELOG.md` to remove leftover template boilerplate
   and reflect the plugin's actual flags, behavior, and release history.
 - Updated the Go toolchain and Go module dependencies, and bumped the GitHub
-  Actions used by the workflows to their current major versions.
+  Actions used by the workflows to their current major versions. This includes
+  `google.golang.org/grpc` 1.83.2, which resolves a high-severity HTTP/2 heap
+  memory exhaustion (OOM) advisory affecting versions <= 1.83.0.
 
 ### Added
 - Real unit tests in `main_test.go`, replacing the placeholder `TestMain` stub.
@@ -24,6 +28,10 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 ### Fixed
 - A server reported as `DOWN` now exits WARNING instead of CRITICAL, so server-level
   and backend-level failures are no longer indistinguishable to Sensu.
+- Removed a trailing space from the plugin name, which rendered as a double space in
+  `--help` output and reported the plugin under a name matching neither the repository
+  nor the Bonsai asset. The config keyspace was already correct, so annotation-based
+  configuration is unaffected.
 
 ## [0.3.2] - 2025-02-24
 
@@ -85,7 +93,8 @@ Versioning](http://semver.org/spec/v2.0.0.html).
   a single `--socket` flag (`HAPROXY_SOCKET`, default
   `unix:///var/run/haproxy.sock`).
 
-[Unreleased]: https://github.com/elfranne/check-haproxy-endpoint/compare/0.3.2...HEAD
+[Unreleased]: https://github.com/elfranne/check-haproxy-endpoint/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/elfranne/check-haproxy-endpoint/compare/0.3.2...0.4.0
 [0.3.2]: https://github.com/elfranne/check-haproxy-endpoint/compare/0.3.1...0.3.2
 [0.3.1]: https://github.com/elfranne/check-haproxy-endpoint/compare/0.3...0.3.1
 [0.3]: https://github.com/elfranne/check-haproxy-endpoint/compare/0.2.3...0.3

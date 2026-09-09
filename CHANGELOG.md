@@ -9,14 +9,21 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ### Changed
 - Migrated `.goreleaser.yml` to the GoReleaser v2 config schema.
-- Modernized the GitHub Actions workflows: bumped actions to their current major
-  versions, tightened workflow permissions to least-privilege, added pull request
-  triggers, and added concurrency groups to cancel superseded runs.
+- Hardened the GitHub Actions workflows: tightened permissions to least-privilege,
+  added pull request triggers, added concurrency groups to cancel superseded runs,
+  and added `go vet`/`go build` steps to the test workflow.
 - Rewrote `README.md` and `CHANGELOG.md` to remove leftover template boilerplate
   and reflect the plugin's actual flags, behavior, and release history.
+- Updated the Go toolchain and Go module dependencies, and bumped the GitHub
+  Actions used by the workflows to their current major versions.
 
 ### Added
 - Real unit tests in `main_test.go`, replacing the placeholder `TestMain` stub.
+- A `.golangci.yml` config, required for golangci-lint v2 to run at all in CI.
+
+### Fixed
+- A server reported as `DOWN` now exits WARNING instead of CRITICAL, so server-level
+  and backend-level failures are no longer indistinguishable to Sensu.
 
 ## [0.3.2] - 2025-02-24
 

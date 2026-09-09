@@ -1,9 +1,19 @@
 name: Go Lint
 
-on: [push]
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  lint:
     name: Lint
     runs-on: ${{ matrix.os }}
     strategy:
@@ -18,3 +28,5 @@ jobs:
         go-version-file: 'go.mod'
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v9
+      with:
+        version: v2.13.2

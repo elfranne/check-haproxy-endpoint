@@ -27,7 +27,7 @@ type Config struct {
 var (
 	plugin = Config{
 		PluginConfig: sensu.PluginConfig{
-			Name:     "check-haproxy-endpoint ",
+			Name:     "check-haproxy-endpoint",
 			Short:    "Check Haproxy endpoints",
 			Keyspace: "sensu.io/plugins/check-haproxy-endpoint/config",
 		},

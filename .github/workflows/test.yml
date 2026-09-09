@@ -1,6 +1,16 @@
 name: Go Test
 
-on: [push]
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -17,5 +27,9 @@ jobs:
       with:
         go-version-file: 'go.mod'
       id: go
+    - name: Vet
+      run: go vet ./...
+    - name: Build
+      run: go build ./...
     - name: Test
       run: go test -v ./...
